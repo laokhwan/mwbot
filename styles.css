@@ -43,3 +43,59 @@ footer { min-height:38px;padding:7px 22px;display:flex;justify-content:space-bet
 @media (max-width:900px){.welcome-screen.active{grid-template-columns:1fr;text-align:center}.welcome-copy{z-index:3}.lead,.placeholder-warning{margin-left:auto;margin-right:auto}.robot-stage{position:absolute;right:-70px;bottom:-80px;opacity:.18;transform:scale(.75)}.menu-grid{grid-template-columns:repeat(2,1fr)}.ask-layout{grid-template-columns:1fr}.suggestions{max-height:220px;overflow:auto}.control-button span{display:none}.status-chip{margin-left:0}.topbar{justify-content:space-between}.status-chip{order:-1}.content-cards{grid-template-columns:1fr}}
 @media (max-width:540px){.screen{padding:20px 14px}.topbar{gap:5px;padding:7px}.control-button{min-height:44px;padding:7px 10px}.status-chip{padding:8px 10px;font-size:.78rem}.menu-grid{gap:11px}.menu-card{min-height:160px;padding:17px}.menu-card h3{font-size:1.06rem}.menu-card p{font-size:.86rem}.menu-icon{width:45px;height:45px;margin-bottom:12px}.input-row{flex-wrap:wrap}.input-row input{flex-basis:100%}.ask-button,.mic-button{flex:1}.qr-wrap{align-items:flex-start}footer #idleHint{display:none}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
+
+/* Alvis conversational welcome */
+body.is-welcome .topbar, body.is-welcome footer { display:none; }
+body.is-welcome .app-shell { grid-template-rows:1fr; }
+.welcome-screen.active { position:relative; display:block; padding:0; overflow:hidden; background:linear-gradient(150deg,#fffef7 0%,#f7f2d9 48%,#dce8ff 100%); }
+.alvis-scene { position:relative; width:100%; min-height:100vh; min-height:100dvh; overflow:hidden; isolation:isolate; }
+.alvis-scene::before { content:""; position:absolute; inset:0; z-index:-3; background:radial-gradient(circle at 70% 36%,rgba(255,224,49,.28),transparent 24%),radial-gradient(circle at 25% 22%,rgba(40,78,166,.15),transparent 31%); }
+.alvis-brand { position:absolute; top:max(24px,env(safe-area-inset-top)); left:clamp(20px,4vw,56px); z-index:5; display:flex; align-items:center; gap:10px; color:#20499f; font-size:.85rem; font-weight:900; letter-spacing:.16em; }
+.brand-dot { width:13px; height:13px; border-radius:50%; background:#ffdf2f; box-shadow:0 0 0 6px rgba(255,223,47,.2); }
+.alvis-glow { position:absolute; z-index:-1; width:min(66vw,760px); aspect-ratio:1; left:clamp(-140px,2vw,60px); top:50%; transform:translateY(-50%); border-radius:50%; background:rgba(255,255,255,.72); box-shadow:0 0 0 42px rgba(255,255,255,.22),0 0 0 90px rgba(255,255,255,.12); }
+.alvis-mascot { position:absolute; z-index:1; left:clamp(-30px,2vw,90px); bottom:-1.5vh; width:min(55vw,690px); max-height:89vh; object-fit:contain; object-position:center bottom; mix-blend-mode:multiply; filter:drop-shadow(0 28px 25px rgba(29,67,146,.18)); transform-origin:center bottom; animation:alvis-breathe 3.4s ease-in-out infinite; }
+.conversation-panel { position:absolute; z-index:3; width:min(48vw,680px); right:clamp(28px,6vw,100px); top:50%; transform:translateY(-50%); padding:clamp(26px,4vw,54px); border:1px solid rgba(32,73,159,.12); border-radius:42px 42px 42px 12px; background:rgba(255,255,255,.88); box-shadow:0 30px 80px rgba(32,73,159,.16); backdrop-filter:blur(16px); }
+.conversation-panel::before { content:""; position:absolute; left:-27px; bottom:66px; width:54px; height:54px; background:inherit; clip-path:polygon(100% 0,100% 100%,0 100%); }
+.speaker-name { margin:0 0 16px; color:#20499f; font-weight:950; font-size:1.1rem; }.speaker-name span { margin-left:8px; color:#74809a; font-size:.84rem; font-weight:700; }
+.conversation-text { margin:0; max-width:none; color:#17396f; font-size:clamp(2rem,4vw,4.35rem); line-height:1.14; letter-spacing:-.04em; }
+.conversation-hint { margin:20px 0 25px; color:#68758c; font-size:clamp(1rem,1.5vw,1.2rem); line-height:1.65; }
+.conversation-cta { width:100%; display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:13px; text-align:left; background:#20499f; }.conversation-cta .cta-icon { display:grid; place-items:center; width:35px; height:35px; border-radius:50%; background:#ffdf2f; color:#ffdf2f; box-shadow:inset 0 0 0 9px #20499f,0 0 0 3px #ffdf2f; }.conversation-cta .cta-arrow { color:#ffdf2f; font-size:1.6rem; }
+.conversation-panel .placeholder-warning { margin:16px 0 0; text-align:center; }
+.sound-waves { position:absolute; z-index:2; left:min(48vw,590px); top:24%; display:flex; align-items:center; gap:5px; height:42px; opacity:0; }.sound-waves i { width:5px; height:14px; border-radius:8px; background:#20499f; }.speaking-robot .sound-waves { opacity:1; }.speaking-robot .sound-waves i { animation:wave .55s ease-in-out infinite alternate; }.speaking-robot .sound-waves i:nth-child(2),.speaking-robot .sound-waves i:nth-child(4){animation-delay:.16s}.speaking-robot .sound-waves i:nth-child(3){animation-delay:.3s}.speaking-robot .alvis-mascot{animation:alvis-talk .42s ease-in-out infinite alternate}
+@keyframes alvis-breathe { 50%{transform:translateY(-7px) scale(1.012)} } @keyframes alvis-talk { to{transform:translateY(-10px) rotate(-1deg) scale(1.018)} } @keyframes wave { to{height:40px} }
+@media (max-width:850px){.alvis-mascot{width:min(82vw,610px);left:50%;transform:translateX(-50%);bottom:-10px;max-height:62vh;opacity:.32}.alvis-glow{width:85vw;left:50%;top:35%;transform:translate(-50%,-50%)}.conversation-panel{width:calc(100% - 30px);right:15px;top:auto;bottom:max(16px,env(safe-area-inset-bottom));transform:none;padding:25px;border-radius:28px}.conversation-panel::before{display:none}.conversation-text{font-size:clamp(1.75rem,7vw,3rem)}.speaker-name{margin-bottom:10px}.conversation-hint{margin:12px 0 17px}.sound-waves{left:50%;top:18%}}
+@media (max-height:620px) and (min-width:851px){.conversation-panel{padding:28px}.conversation-text{font-size:clamp(2rem,3.5vw,3.4rem)}.conversation-hint{margin:12px 0 16px}.alvis-mascot{max-height:82vh}}
+
+/* Full-screen CSS puppet: separate eyes and mouth animate while Alvis speaks */
+.alvis-scene { background:linear-gradient(155deg,#fdfcf5 0%,#edf4ff 100%); }
+.alvis-glow { width:min(92vw,1100px); background:rgba(255,224,49,.13); }
+.alvis-puppet { position:absolute; inset:0; width:100%; max-height:none; filter:drop-shadow(0 30px 32px rgba(23,58,130,.18)); animation:puppet-float 4s ease-in-out infinite; mix-blend-mode:normal; }
+.puppet-ear { position:absolute; z-index:1; top:-12vh; width:24vw; height:61vh; min-width:180px; min-height:380px; border-radius:52% 52% 19% 19%; background:linear-gradient(105deg,#173f98,#285ab9); border:clamp(5px,.7vw,11px) solid #19469f; transform-origin:center bottom; }
+.puppet-ear-left { left:21vw; transform:rotate(-8deg); }.puppet-ear-right { right:21vw; transform:rotate(8deg); }
+.puppet-ear span { position:absolute; top:17%; left:46%; width:15%; height:22%; border-radius:50%; background:rgba(114,164,226,.55); transform:rotate(-17deg); }
+.puppet-head { position:absolute; z-index:2; left:50%; top:50%; transform:translate(-50%,-46%); width:min(86vw,1200px); height:min(67vh,700px); border:clamp(7px,.8vw,13px) solid #19469f; border-radius:47% 47% 43% 43%; background:linear-gradient(180deg,#fffef7 0 67%,#e7f0f7 68% 100%); box-shadow:inset 0 -3vh 0 rgba(198,218,233,.5); }
+.puppet-face { position:absolute; left:50%; top:52%; transform:translate(-50%,-50%); width:68%; height:67%; border-radius:42% 42% 48% 48%; background:linear-gradient(145deg,#ffe947,#ffd323); box-shadow:inset 0 14px 28px rgba(255,255,255,.2); }
+.puppet-eye { position:absolute; top:34%; width:7.5%; height:22%; border-radius:50%; background:#19469f; transform-origin:center; animation:alvis-blink 5s infinite; box-shadow:inset 0 -4px 0 rgba(4,40,113,.25); }.puppet-eye-left{left:32%}.puppet-eye-right{right:32%}.puppet-eye i{position:absolute;left:25%;top:13%;width:30%;height:30%;border-radius:50%;background:#fff}
+.puppet-mouth { position:absolute; left:50%; top:64%; transform:translateX(-50%); width:16%; height:15%; overflow:hidden; border-radius:12% 12% 52% 52%; background:#19469f; transform-origin:center top; transition:transform .15s ease; }.puppet-mouth span{position:absolute;left:25%;bottom:-7%;width:50%;height:32%;border-radius:50% 50% 0 0;background:#ef6375}
+.speaking-robot .puppet-mouth { animation:alvis-mouth .22s ease-in-out infinite alternate; }.speaking-robot .puppet-head { animation:head-talk .42s ease-in-out infinite alternate; }.speaking-robot .alvis-mascot { animation:none; }
+.conversation-panel { width:min(74vw,900px); right:auto; left:50%; top:auto; bottom:max(20px,env(safe-area-inset-bottom)); transform:translateX(-50%); padding:20px 24px; border-radius:28px; background:rgba(255,255,255,.9); text-align:center; }
+.conversation-panel::before { display:none; }.speaker-name{margin:0 0 5px}.conversation-text{font-size:clamp(1.45rem,2.3vw,2.25rem);line-height:1.2}.conversation-hint{margin:7px 0 12px;font-size:.98rem}.conversation-cta{max-width:480px;min-height:54px;margin:auto}.conversation-panel .placeholder-warning{display:none}.sound-waves{left:auto;right:5vw;top:23%}
+@keyframes alvis-blink{0%,45%,49%,100%{transform:scaleY(1)}47%{transform:scaleY(.06)}}@keyframes alvis-mouth{from{transform:translateX(-50%) scaleY(.48)}to{transform:translateX(-50%) scaleY(1.18)}}@keyframes head-talk{to{transform:translate(-50%,-47%) rotate(-.7deg)}}@keyframes puppet-float{50%{transform:translateY(-6px)}}
+@media(max-width:850px){.alvis-puppet{width:100%;left:0;bottom:0;opacity:1;transform:none;max-height:none}.puppet-head{width:110vw;height:55vh;top:44%}.puppet-ear{top:-5vh;width:34vw;height:47vh;min-width:0;min-height:0}.puppet-ear-left{left:14vw}.puppet-ear-right{right:14vw}.conversation-panel{width:calc(100% - 24px);right:auto;left:50%;bottom:12px;transform:translateX(-50%)}.conversation-text{font-size:clamp(1.3rem,5vw,1.9rem)}.conversation-hint{display:none}.sound-waves{right:4vw;top:16%}}
+
+/* The physical robot shell already provides Alvis's head and ears.
+   The display renders only the inner digital face. */
+.alvis-scene { background:linear-gradient(145deg,#fff05a 0%,#ffdb28 54%,#ffc91d 100%); }
+.alvis-scene::before { background:radial-gradient(circle at 32% 18%,rgba(255,255,255,.2),transparent 32%),radial-gradient(circle at 75% 80%,rgba(231,161,0,.13),transparent 35%); }
+.alvis-glow,.puppet-ear { display:none; }
+.alvis-puppet { inset:0; transform:none; filter:none; }
+.puppet-head { inset:0; width:100%; height:100%; transform:none; border:0; border-radius:0; background:transparent; box-shadow:none; }
+.puppet-face { inset:0; width:100%; height:100%; transform:none; border-radius:0; background:transparent; box-shadow:none; }
+.puppet-eye { top:28%; width:8.5%; height:25%; }.puppet-eye-left{left:31%}.puppet-eye-right{right:31%}
+.puppet-mouth { top:58%; width:17%; height:18%; }
+.speaking-robot .puppet-head { animation:inner-face-talk .42s ease-in-out infinite alternate; }
+.speaking-robot .alvis-mascot { animation:none; }
+.alvis-brand { color:#173f98; }
+.conversation-panel { width:min(70vw,850px); padding:16px 22px; background:rgba(255,255,255,.88); }
+@keyframes inner-face-talk{to{transform:translateY(-4px)}}
+@media(max-width:850px){.puppet-head{inset:0;width:100%;height:100%;transform:none}.puppet-eye{top:25%;width:11%;height:23%}.puppet-eye-left{left:28%}.puppet-eye-right{right:28%}.puppet-mouth{top:54%;width:23%;height:16%}.conversation-panel{width:calc(100% - 24px)}}

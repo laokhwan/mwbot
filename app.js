@@ -8,7 +8,8 @@
     app: $("#app"), menuGrid: $("#menuGrid"), detailTitle: $("#detailTitle"), detailContent: $("#detailContent"),
     questionForm: $("#questionForm"), questionInput: $("#questionInput"), answerText: $("#answerText"), suggestionList: $("#suggestionList"),
     statusChip: $("#statusChip"), statusText: $("#statusText"), soundButton: $("#soundButton"), stopButton: $("#stopButton"),
-    backButton: $("#backButton"), micButton: $("#micButton"), micNote: $("#micNote"), robotFace: $("#robotFace")
+    backButton: $("#backButton"), micButton: $("#micButton"), micNote: $("#micNote"), robotFace: $("#robotFace"),
+    alvisMascot: $("#alvisMascot"), conversationText: $("#welcomeTitle"), conversationHint: $("#conversationHint"), startButton: $("#startButton")
   };
 
   function setStatus(kind) {
@@ -42,12 +43,19 @@
     stopAll();
     if (addHistory && state.current !== name) state.history.push(state.current);
     state.current = name;
+    document.body.classList.toggle("is-welcome", name === "welcome");
     screens.forEach((screen) => screen.classList.toggle("active", screen.dataset.screen === name));
     els.backButton.disabled = name === "welcome" || state.history.length === 0;
     els.app.scrollTop = 0; els.app.focus({ preventScroll: true }); resetIdleTimer();
   }
 
-  function goHome() { state.history = []; navigate("welcome", false); }
+  function restoreWelcome() {
+    els.conversationText.innerHTML = "สวัสดี! ฉันชื่ออัลวิส<br />ยินดีต้อนรับสู่ MWIT Open House";
+    els.conversationHint.textContent = "แตะปุ่มด้านล่าง แล้วมาคุยกันนะ";
+    els.startButton.dataset.stage = "hello";
+    els.startButton.querySelector(".cta-label").textContent = "คุยกับอัลวิส";
+  }
+  function goHome() { state.history = []; restoreWelcome(); navigate("welcome", false); }
   function goBack() { if (!state.history.length) return; navigate(state.history.pop(), false); }
   function resetApp() { stopAll(); els.questionInput.value = ""; els.answerText.textContent = "ลองเลือกคำถามแนะนำ หรือพิมพ์คำถามด้านบนได้เลย"; goHome(); }
   function resetIdleTimer() { clearTimeout(state.idleTimer); state.idleTimer = setTimeout(resetApp, 60000); }
@@ -94,7 +102,18 @@
   });
   data.qa.slice(0, 8).forEach((item) => { const button = document.createElement("button"); button.type = "button"; button.textContent = item.question; button.addEventListener("click", () => { els.questionInput.value = item.question; ask(item.question); }); els.suggestionList.appendChild(button); });
 
-  $("#startButton").addEventListener("click", () => { navigate("menu"); speak("สวัสดี ยินดีต้อนรับสู่ MWIT Open House"); });
+  els.startButton.addEventListener("click", () => {
+    if (els.startButton.dataset.stage === "hello") {
+      const greeting = "สวัสดี ฉันชื่ออัลวิส ยินดีต้อนรับสู่ MWIT Open House วันนี้อยากให้ฉันช่วยเรื่องอะไร";
+      els.conversationText.innerHTML = "ดีใจที่ได้พบกัน!<br />วันนี้อยากให้ฉันช่วยเรื่องอะไร?";
+      els.conversationHint.textContent = "ฉันมีกำหนดการ แผนที่ ข้อมูลโรงเรียน และเรื่องน่าสนใจอีกมากมาย";
+      els.startButton.dataset.stage = "menu";
+      els.startButton.querySelector(".cta-label").textContent = "เลือกเรื่องที่สนใจ";
+      speak(greeting);
+    } else {
+      navigate("menu");
+    }
+  });
   $("#homeButton").addEventListener("click", goHome); els.backButton.addEventListener("click", goBack); $("#resetButton").addEventListener("click", resetApp); els.stopButton.addEventListener("click", stopAll);
   els.soundButton.addEventListener("click", () => { state.soundOn = !state.soundOn; els.soundButton.setAttribute("aria-pressed", String(state.soundOn)); els.soundButton.innerHTML = `${state.soundOn ? "🔊 <span>เปิดเสียง</span>" : "🔇 <span>ปิดเสียง</span>"}`; if (!state.soundOn) stopAll(); else speak("เปิดเสียงแล้ว"); resetIdleTimer(); });
   els.questionForm.addEventListener("submit", (event) => { event.preventDefault(); ask(els.questionInput.value); });

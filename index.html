@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#082f49" />
-    <title>MWIT Robot — Open House</title>
+    <title>Alvis — MWIT Open House</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -22,27 +22,33 @@
 
       <main id="app" tabindex="-1">
         <section class="screen welcome-screen active" data-screen="welcome" aria-labelledby="welcomeTitle">
-          <div class="welcome-copy">
-            <p class="eyebrow">MWIT SMART GUIDE</p>
-            <h1 id="welcomeTitle">ยินดีต้อนรับสู่<br /><span>MWIT Open House</span></h1>
-            <p class="lead">แตะเมนูเพื่อเริ่มต้น หรือถามน้องโรโบเกี่ยวกับงานวันนี้ได้เลย</p>
-            <button class="primary-cta" id="startButton" type="button">แตะเพื่อเริ่มต้น <span>→</span></button>
-            <p class="placeholder-warning">ข้อมูลในต้นแบบนี้เป็นข้อมูลตัวอย่าง กรุณาตรวจสอบก่อนใช้งานจริง</p>
-          </div>
-          <div class="robot-stage" aria-hidden="true">
-            <div class="signal signal-one"></div><div class="signal signal-two"></div>
-            <div class="robot" id="robotFace">
-              <div class="antenna"><span></span></div>
-              <div class="robot-head">
-                <div class="robot-screen"><i class="eye"></i><i class="eye"></i><b class="mouth"></b></div>
+          <div class="alvis-scene" id="robotFace">
+            <div class="alvis-brand"><span class="brand-dot"></span> MWIT OPEN HOUSE</div>
+            <div class="alvis-glow" aria-hidden="true"></div>
+            <div class="alvis-mascot alvis-puppet" id="alvisMascot" role="img" aria-label="ใบหน้าอัลวิส มาสคอตของโรงเรียนมหิดลวิทยานุสรณ์">
+              <div class="puppet-head">
+                <div class="puppet-face">
+                  <div class="puppet-eye puppet-eye-left"><i></i></div>
+                  <div class="puppet-eye puppet-eye-right"><i></i></div>
+                  <div class="puppet-mouth"><span></span></div>
+                </div>
               </div>
-              <div class="robot-neck"></div><div class="robot-body"><span>MWIT</span></div>
             </div>
+            <div class="conversation-panel">
+              <p class="speaker-name">อัลวิส <span>ผู้ช่วยนำชมของคุณ</span></p>
+              <h1 id="welcomeTitle" class="conversation-text" aria-live="polite">สวัสดี! ฉันชื่ออัลวิส<br />ยินดีต้อนรับสู่ MWIT Open House</h1>
+              <p class="conversation-hint" id="conversationHint">แตะปุ่มด้านล่าง แล้วมาคุยกันนะ</p>
+              <button class="primary-cta conversation-cta" id="startButton" type="button" data-stage="hello">
+                <span class="cta-icon" aria-hidden="true">●</span><span class="cta-label">คุยกับอัลวิส</span><span class="cta-arrow">→</span>
+              </button>
+              <p class="placeholder-warning">ข้อมูลในต้นแบบนี้เป็นข้อมูลตัวอย่าง กรุณาตรวจสอบก่อนใช้งานจริง</p>
+            </div>
+            <div class="sound-waves" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
           </div>
         </section>
 
         <section class="screen menu-screen" data-screen="menu" aria-labelledby="menuTitle">
-          <div class="section-heading"><p class="eyebrow">เลือกหัวข้อที่สนใจ</p><h2 id="menuTitle">วันนี้ให้น้องโรโบช่วยอะไรดี?</h2></div>
+          <div class="section-heading"><p class="eyebrow">อัลวิสพร้อมช่วยแล้ว</p><h2 id="menuTitle">วันนี้อยากให้อัลวิสช่วยเรื่องอะไร?</h2></div>
           <div class="menu-grid" id="menuGrid"></div>
         </section>
 
@@ -54,7 +60,7 @@
         <section class="screen ask-screen" data-screen="ask" aria-labelledby="askTitle">
           <div class="ask-layout">
             <div class="ask-main">
-              <div class="section-heading compact"><p class="eyebrow">ถามข้อมูลโรงเรียน</p><h2 id="askTitle">มีอะไรให้น้องโรโบช่วยไหม?</h2></div>
+              <div class="section-heading compact"><p class="eyebrow">ถามข้อมูลโรงเรียน</p><h2 id="askTitle">มีอะไรให้อัลวิสช่วยไหม?</h2></div>
               <form class="question-box" id="questionForm">
                 <label for="questionInput">พิมพ์คำถาม เช่น “ห้องน้ำอยู่ที่ไหน”</label>
                 <div class="input-row">
@@ -65,8 +71,8 @@
                 <p class="mic-note" id="micNote">หากเบราว์เซอร์รองรับ จะมีปุ่มพูดคำถามแสดงที่นี่</p>
               </form>
               <div class="answer-card" id="answerCard" aria-live="polite">
-                <span class="answer-label">คำตอบจากน้องโรโบ</span>
-                <p id="answerText">ลองเลือกคำถามแนะนำ หรือพิมพ์คำถามด้านบนได้เลย</p>
+                <span class="answer-label">คำตอบจากอัลวิส</span>
+                <p id="answerText">ลองเลือกคำถามแนะนำ หรือพิมพ์คำถามให้อัลวิสได้เลย</p>
               </div>
             </div>
             <aside class="suggestions"><h3>คำถามแนะนำ</h3><div id="suggestionList"></div></aside>
@@ -74,7 +80,7 @@
         </section>
       </main>
 
-      <footer><span>MWIT Robot Prototype</span><span id="idleHint">จะกลับหน้าต้อนรับเมื่อไม่มีการใช้งาน 60 วินาที</span></footer>
+      <footer><span>Alvis — MWIT Open House Prototype</span><span id="idleHint">จะกลับหน้าต้อนรับเมื่อไม่มีการใช้งาน 60 วินาที</span></footer>
     </div>
     <noscript>เว็บไซต์นี้ต้องเปิด JavaScript เพื่อใช้งาน</noscript>
     <script src="data.js"></script>
