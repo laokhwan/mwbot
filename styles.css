@@ -99,3 +99,73 @@ body.is-welcome .app-shell { grid-template-rows:1fr; }
 .conversation-panel { width:min(70vw,850px); padding:16px 22px; background:rgba(255,255,255,.88); }
 @keyframes inner-face-talk{to{transform:translateY(-4px)}}
 @media(max-width:850px){.puppet-head{inset:0;width:100%;height:100%;transform:none}.puppet-eye{top:25%;width:11%;height:23%}.puppet-eye-left{left:28%}.puppet-eye-right{right:28%}.puppet-mouth{top:54%;width:23%;height:16%}.conversation-panel{width:calc(100% - 24px)}}
+
+/* Compact horizontal conversation controls keep Alvis's mouth visible. */
+.puppet-eye { top:19%; }
+.puppet-mouth { top:45%; }
+.conversation-panel { width:min(94vw,1080px); display:grid; grid-template-columns:minmax(240px,300px) minmax(0,1fr); grid-template-areas:"action speaker" "action message" "action hint"; column-gap:28px; row-gap:3px; align-items:center; padding:15px 22px; text-align:left; }
+.conversation-cta { grid-area:action; width:100%; max-width:none; min-height:68px; margin:0; }
+.speaker-name { grid-area:speaker; margin:0; }
+.conversation-text { grid-area:message; max-width:100%; font-size:clamp(1.25rem,2.05vw,2rem); line-height:1.16; white-space:nowrap; }
+.conversation-hint { grid-area:hint; margin:3px 0 0; font-size:.88rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+@media(max-width:850px){.puppet-eye{top:17%}.puppet-mouth{top:41%}.conversation-panel{display:grid;grid-template-columns:minmax(150px,210px) minmax(0,1fr);grid-template-areas:"action speaker" "action message";column-gap:14px;padding:12px 14px}.conversation-hint{display:none}.conversation-text{font-size:clamp(1rem,3.5vw,1.45rem);white-space:normal}.conversation-cta{min-height:58px}.speaker-name span{display:none}}
+@media(max-width:560px){.conversation-panel{grid-template-columns:1fr;grid-template-areas:"speaker" "message" "action";text-align:center;row-gap:7px}.conversation-text{white-space:normal}.conversation-cta{max-width:320px;margin:auto}.puppet-eye{top:13%}.puppet-mouth{top:37%}}
+
+/* Alvis expression system: four friendly faces plus animated speech. */
+.puppet-eye {
+  width:11%;
+  height:29%;
+  transition:width .28s ease,height .28s ease,top .28s ease,transform .28s ease,background .2s ease,border .2s ease;
+}
+.puppet-eye-left { left:27.5%; }
+.puppet-eye-right { right:27.5%; }
+.puppet-mouth {
+  transition:width .25s ease,height .25s ease,top .25s ease,transform .15s ease,background .2s ease,border .2s ease;
+}
+.expression-open-awake .puppet-eye,
+.expression-open-happy .puppet-eye,
+.expression-curve-awake .puppet-eye {
+  background:#19469f;
+  border:0;
+  border-radius:50%;
+}
+.expression-open-happy .puppet-eye,
+.expression-curve-happy .puppet-eye {
+  top:24%;
+  width:13%;
+  height:10%;
+  background:transparent;
+  border:0;
+  border-top:clamp(10px,1.45vw,18px) solid #19469f;
+  border-radius:50% 50% 0 0;
+  box-shadow:none;
+  animation:none;
+}
+.expression-open-happy .puppet-eye i,
+.expression-curve-happy .puppet-eye i { display:none; }
+.expression-curve-awake .puppet-mouth,
+.expression-curve-happy .puppet-mouth {
+  width:18%;
+  height:9%;
+  overflow:visible;
+  background:transparent;
+  border:0;
+  border-bottom:clamp(10px,1.35vw,17px) solid #19469f;
+  border-radius:0 0 50% 50%;
+}
+.expression-curve-awake .puppet-mouth span,
+.expression-curve-happy .puppet-mouth span { display:none; }
+.speaking-robot .puppet-mouth {
+  width:17%;
+  height:18%;
+  overflow:hidden;
+  background:#19469f;
+  border:0;
+  border-radius:12% 12% 52% 52%;
+  animation:alvis-mouth .18s ease-in-out infinite alternate;
+}
+.speaking-robot .puppet-mouth span { display:block; }
+@media(max-width:850px){
+  .puppet-eye{width:13%;height:27%}.puppet-eye-left{left:25.5%}.puppet-eye-right{right:25.5%}
+  .expression-open-happy .puppet-eye,.expression-curve-happy .puppet-eye{top:21%;width:15%;height:9%}
+}

@@ -3,7 +3,11 @@
   const data = window.MWIT_DATA;
   const $ = (selector) => document.querySelector(selector);
   const screens = [...document.querySelectorAll(".screen")];
-  const state = { current: "welcome", history: [], soundOn: true, idleTimer: null, recognition: null, listening: false };
+  const state = {
+    current: "welcome", history: [], soundOn: true, idleTimer: null, recognition: null, listening: false,
+    expressionIndex: 0, expressionTimer: null
+  };
+  const expressions = ["open-awake", "open-happy", "curve-awake", "curve-happy"];
   const els = {
     app: $("#app"), menuGrid: $("#menuGrid"), detailTitle: $("#detailTitle"), detailContent: $("#detailContent"),
     questionForm: $("#questionForm"), questionInput: $("#questionInput"), answerText: $("#answerText"), suggestionList: $("#suggestionList"),
@@ -12,11 +16,29 @@
     alvisMascot: $("#alvisMascot"), conversationText: $("#welcomeTitle"), conversationHint: $("#conversationHint"), startButton: $("#startButton")
   };
 
+  function setExpression(name) {
+    expressions.forEach((expression) => els.robotFace.classList.remove(`expression-${expression}`));
+    els.robotFace.classList.add(`expression-${name}`);
+  }
+
+  function startExpressionCycle() {
+    clearInterval(state.expressionTimer);
+    setExpression(expressions[state.expressionIndex]);
+    state.expressionTimer = setInterval(() => {
+      if (state.current !== "welcome" || state.listening || els.robotFace.classList.contains("speaking-robot")) return;
+      state.expressionIndex = (state.expressionIndex + 1) % expressions.length;
+      setExpression(expressions[state.expressionIndex]);
+    }, 4200);
+  }
+
   function setStatus(kind) {
     const labels = { ready: "พร้อมใช้งาน", listening: "กำลังฟัง", speaking: "กำลังพูด" };
     els.statusChip.className = `status-chip ${kind === "ready" ? "" : kind}`;
     els.statusText.textContent = labels[kind] || labels.ready;
     els.robotFace.classList.toggle("speaking-robot", kind === "speaking");
+    if (kind === "speaking") setExpression("open-happy");
+    else if (kind === "listening") setExpression("curve-awake");
+    else if (state.current === "welcome") startExpressionCycle();
   }
 
   function stopAll() {
@@ -31,7 +53,7 @@
     if (!state.soundOn || !("speechSynthesis" in window) || !text) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text.replace(/PLACEHOLDER/gi, "ข้อมูลตัวอย่าง"));
-    utterance.lang = "th-TH"; utterance.rate = 0.95; utterance.pitch = 1.05;
+    utterance.lang = "th-TH"; utterance.rate = 1.05; utterance.pitch = 1.35;
     const thaiVoice = window.speechSynthesis.getVoices().find((voice) => voice.lang.toLowerCase().startsWith("th"));
     if (thaiVoice) utterance.voice = thaiVoice;
     utterance.onstart = () => setStatus("speaking");
@@ -43,6 +65,8 @@
     stopAll();
     if (addHistory && state.current !== name) state.history.push(state.current);
     state.current = name;
+    if (name === "welcome") startExpressionCycle();
+    else clearInterval(state.expressionTimer);
     document.body.classList.toggle("is-welcome", name === "welcome");
     screens.forEach((screen) => screen.classList.toggle("active", screen.dataset.screen === name));
     els.backButton.disabled = name === "welcome" || state.history.length === 0;
@@ -50,7 +74,7 @@
   }
 
   function restoreWelcome() {
-    els.conversationText.innerHTML = "สวัสดี! ฉันชื่ออัลวิส<br />ยินดีต้อนรับสู่ MWIT Open House";
+    els.conversationText.textContent = "สวัสดี! ฉันชื่ออัลวิส — ยินดีต้อนรับสู่โรงเรียนมหิดลวิทยานุสรณ์";
     els.conversationHint.textContent = "แตะปุ่มด้านล่าง แล้วมาคุยกันนะ";
     els.startButton.dataset.stage = "hello";
     els.startButton.querySelector(".cta-label").textContent = "คุยกับอัลวิส";
@@ -104,8 +128,8 @@
 
   els.startButton.addEventListener("click", () => {
     if (els.startButton.dataset.stage === "hello") {
-      const greeting = "สวัสดี ฉันชื่ออัลวิส ยินดีต้อนรับสู่ MWIT Open House วันนี้อยากให้ฉันช่วยเรื่องอะไร";
-      els.conversationText.innerHTML = "ดีใจที่ได้พบกัน!<br />วันนี้อยากให้ฉันช่วยเรื่องอะไร?";
+      const greeting = "สวัสดี ฉันชื่ออัล-วิส ยินดีต้อนรับสู่โรงเรียนมหิดลวิทยานุสรณ์ วันนี้อยากให้ช่วยเรื่องอะไร";
+      els.conversationText.textContent = "ดีใจที่ได้พบกัน! วันนี้อยากให้ฉันช่วยเรื่องอะไร?";
       els.conversationHint.textContent = "ฉันมีกำหนดการ แผนที่ ข้อมูลโรงเรียน และเรื่องน่าสนใจอีกมากมาย";
       els.startButton.dataset.stage = "menu";
       els.startButton.querySelector(".cta-label").textContent = "เลือกเรื่องที่สนใจ";
