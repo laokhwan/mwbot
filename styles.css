@@ -113,12 +113,12 @@ body.is-welcome .app-shell { grid-template-rows:1fr; }
 
 /* Alvis expression system: four friendly faces plus animated speech. */
 .puppet-eye {
-  width:11%;
-  height:29%;
+  width:15%;
+  height:31%;
   transition:width .28s ease,height .28s ease,top .28s ease,transform .28s ease,background .2s ease,border .2s ease;
 }
-.puppet-eye-left { left:27.5%; }
-.puppet-eye-right { right:27.5%; }
+.puppet-eye-left { left:23%; }
+.puppet-eye-right { right:23%; }
 .puppet-mouth {
   transition:width .25s ease,height .25s ease,top .25s ease,transform .15s ease,background .2s ease,border .2s ease;
 }
@@ -132,8 +132,8 @@ body.is-welcome .app-shell { grid-template-rows:1fr; }
 .expression-open-happy .puppet-eye,
 .expression-curve-happy .puppet-eye {
   top:24%;
-  width:13%;
-  height:10%;
+  width:18%;
+  height:12%;
   background:transparent;
   border:0;
   border-top:clamp(10px,1.45vw,18px) solid #19469f;
@@ -166,6 +166,80 @@ body.is-welcome .app-shell { grid-template-rows:1fr; }
 }
 .speaking-robot .puppet-mouth span { display:block; }
 @media(max-width:850px){
-  .puppet-eye{width:13%;height:27%}.puppet-eye-left{left:25.5%}.puppet-eye-right{right:25.5%}
-  .expression-open-happy .puppet-eye,.expression-curve-happy .puppet-eye{top:21%;width:15%;height:9%}
+  .puppet-eye{width:17%;height:29%}.puppet-eye-left{left:20.5%}.puppet-eye-right{right:20.5%}
+  .expression-open-happy .puppet-eye,.expression-curve-happy .puppet-eye{top:21%;width:20%;height:11%}
+}
+
+/* Current robot prototype: expression is communicated with the eyes only. */
+.puppet-mouth { display:none !important; }
+.puppet-brow {
+  display:none !important;
+}
+.puppet-eye {
+  --gaze-x:0px;
+  --eye-tilt:0deg;
+  top:20%;
+  width:15%;
+  height:31%;
+  background:#19469f;
+  border:0;
+  border-radius:50%;
+  box-shadow:inset 0 -4px 0 rgba(4,40,113,.25);
+  transform:translateX(var(--gaze-x)) rotate(var(--eye-tilt));
+  transition:width .28s ease,height .28s ease,top .28s ease,transform .55s cubic-bezier(.22,.8,.3,1),background .2s ease,border .2s ease;
+  animation:none;
+}
+.puppet-eye-left,
+.puppet-eye-right { --eye-tilt:0deg; }
+.gaze-left { --gaze-distance:calc(clamp(14px,2.2vw,26px) * -1); }
+.gaze-center { --gaze-distance:0px; }
+.gaze-right { --gaze-distance:clamp(14px,2.2vw,26px); }
+.gaze-left .puppet-eye,
+.gaze-center .puppet-eye,
+.gaze-right .puppet-eye { --gaze-x:var(--gaze-distance); }
+.puppet-eye i {
+  display:block;
+  transition:left .35s ease,top .35s ease,transform .3s ease;
+}
+.expression-ready .puppet-brow { top:10.5%; }
+.expression-ready .puppet-eye i { left:25%; top:13%; }
+.expression-happy .puppet-eye {
+  top:23%;
+  width:18%;
+  height:12%;
+  background:transparent;
+  border:0;
+  border-top:clamp(11px,1.5vw,19px) solid #19469f;
+  border-radius:50% 50% 0 0;
+  box-shadow:none;
+  animation:none;
+}
+.expression-happy .puppet-eye i { display:none; }
+.expression-happy .puppet-brow { top:8.5%; }
+.expression-happy .puppet-brow-left { transform:rotate(-5deg); }
+.expression-happy .puppet-brow-right { transform:rotate(5deg); }
+.expression-curious .puppet-brow-left { transform:translateY(-5px) rotate(-8deg); }
+.expression-curious .puppet-brow-right { transform:translateY(3px) rotate(6deg); }
+.expression-curious .puppet-eye i { left:38%; transform:scale(.92); }
+.expression-listening .puppet-eye {
+  width:16%;
+  height:32%;
+  box-shadow:inset 0 -4px 0 rgba(4,40,113,.25),0 0 0 clamp(5px,.65vw,9px) rgba(32,73,159,.1);
+}
+.expression-listening .puppet-brow { top:8%; }
+.expression-listening .puppet-eye i { animation:eye-listen 1.1s ease-in-out infinite alternate; }
+.expression-speaking .puppet-eye { height:29%; top:21%; }
+.expression-speaking .puppet-brow { animation:brow-speak .48s ease-in-out infinite alternate; }
+.expression-speaking .puppet-eye i { animation:eye-speak .48s ease-in-out infinite alternate; }
+.blink-now:not(.expression-happy) .puppet-eye { animation:natural-blink .28s ease-in-out 1; }
+@keyframes brow-speak { to { transform:translateY(-5px); } }
+@keyframes eye-speak { to { transform:scale(1.16); } }
+@keyframes eye-listen { to { transform:scale(1.12); opacity:.88; } }
+@keyframes natural-blink {
+  0%,100%{transform:translateX(var(--gaze-x)) rotate(var(--eye-tilt)) scaleY(1)}
+  45%,55%{transform:translateX(var(--gaze-x)) rotate(var(--eye-tilt)) scaleY(.06)}
+}
+@media(max-width:850px){
+  .puppet-eye{top:17%;width:17%;height:29%}
+  .expression-happy .puppet-eye{top:20%;width:20%;height:11%}
 }

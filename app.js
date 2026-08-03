@@ -5,9 +5,10 @@
   const screens = [...document.querySelectorAll(".screen")];
   const state = {
     current: "welcome", history: [], soundOn: true, idleTimer: null, recognition: null, listening: false,
-    expressionIndex: 0, expressionTimer: null
+    expressionTimer: null, smileReturnTimer: null, blinkTimer: null, blinkEndTimer: null, gazeTimer: null,
+    acknowledgementTimer: null, currentGaze: "center"
   };
-  const expressions = ["open-awake", "open-happy", "curve-awake", "curve-happy"];
+  const expressions = ["ready", "happy", "curious", "listening", "speaking"];
   const els = {
     app: $("#app"), menuGrid: $("#menuGrid"), detailTitle: $("#detailTitle"), detailContent: $("#detailContent"),
     questionForm: $("#questionForm"), questionInput: $("#questionInput"), answerText: $("#answerText"), suggestionList: $("#suggestionList"),
@@ -21,14 +22,72 @@
     els.robotFace.classList.add(`expression-${name}`);
   }
 
-  function startExpressionCycle() {
-    clearInterval(state.expressionTimer);
-    setExpression(expressions[state.expressionIndex]);
-    state.expressionTimer = setInterval(() => {
-      if (state.current !== "welcome" || state.listening || els.robotFace.classList.contains("speaking-robot")) return;
-      state.expressionIndex = (state.expressionIndex + 1) % expressions.length;
-      setExpression(expressions[state.expressionIndex]);
-    }, 4200);
+  function randomDelay(min, max) { return Math.round(min + Math.random() * (max - min)); }
+
+  function setGaze(direction) {
+    ["left", "center", "right"].forEach((name) => els.robotFace.classList.remove(`gaze-${name}`));
+    els.robotFace.classList.add(`gaze-${direction}`);
+    state.currentGaze = direction;
+  }
+
+  function clearWelcomeAnimation() {
+    ["expressionTimer", "smileReturnTimer", "blinkTimer", "blinkEndTimer", "gazeTimer", "acknowledgementTimer"].forEach((key) => {
+      clearTimeout(state[key]); state[key] = null;
+    });
+    els.robotFace.classList.remove("blink-now");
+    setGaze("center");
+  }
+
+  function scheduleGaze() {
+    clearTimeout(state.gazeTimer);
+    state.gazeTimer = setTimeout(() => {
+      const canLookAround = state.current === "welcome" && !state.listening && !els.robotFace.classList.contains("speaking-robot") && !els.robotFace.classList.contains("expression-happy");
+      if (canLookAround) {
+        const choices = ["left", "center", "right"].filter((direction) => direction !== state.currentGaze);
+        setGaze(choices[Math.floor(Math.random() * choices.length)]);
+      }
+      scheduleGaze();
+    }, randomDelay(1800, 3400));
+  }
+
+  function scheduleBlink() {
+    clearTimeout(state.blinkTimer);
+    state.blinkTimer = setTimeout(() => {
+      const canBlink = state.current === "welcome" && !state.listening && !els.robotFace.classList.contains("speaking-robot") && !els.robotFace.classList.contains("expression-happy");
+      if (canBlink) {
+        els.robotFace.classList.add("blink-now");
+        state.blinkEndTimer = setTimeout(() => els.robotFace.classList.remove("blink-now"), 280);
+      }
+      scheduleBlink();
+    }, randomDelay(4000, 7000));
+  }
+
+  function scheduleSmile() {
+    clearTimeout(state.expressionTimer);
+    state.expressionTimer = setTimeout(() => {
+      const canSmile = state.current === "welcome" && !state.listening && !els.robotFace.classList.contains("speaking-robot");
+      if (!canSmile) return;
+      setGaze("center");
+      setExpression("happy");
+      state.smileReturnTimer = setTimeout(() => {
+        setExpression("ready");
+        scheduleSmile();
+      }, 1200);
+    }, randomDelay(8000, 12000));
+  }
+
+  function startWelcomeAnimation() {
+    clearWelcomeAnimation();
+    setExpression("ready");
+    scheduleBlink();
+    scheduleGaze();
+    scheduleSmile();
+  }
+
+  function acknowledgeWithSmile(callback) {
+    clearWelcomeAnimation();
+    setExpression("happy");
+    state.acknowledgementTimer = setTimeout(callback, 650);
   }
 
   function setStatus(kind) {
@@ -36,9 +95,9 @@
     els.statusChip.className = `status-chip ${kind === "ready" ? "" : kind}`;
     els.statusText.textContent = labels[kind] || labels.ready;
     els.robotFace.classList.toggle("speaking-robot", kind === "speaking");
-    if (kind === "speaking") setExpression("open-happy");
-    else if (kind === "listening") setExpression("curve-awake");
-    else if (state.current === "welcome") startExpressionCycle();
+    if (kind === "speaking") { clearWelcomeAnimation(); setExpression("speaking"); }
+    else if (kind === "listening") { clearWelcomeAnimation(); setExpression("listening"); }
+    else if (state.current === "welcome") startWelcomeAnimation();
   }
 
   function stopAll() {
@@ -50,7 +109,7 @@
   }
 
   function speak(text) {
-    if (!state.soundOn || !("speechSynthesis" in window) || !text) return;
+    if (!state.soundOn || !("speechSynthesis" in window) || !text) return false;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text.replace(/PLACEHOLDER/gi, "ข้อมูลตัวอย่าง"));
     utterance.lang = "th-TH"; utterance.rate = 1.05; utterance.pitch = 1.35;
@@ -59,14 +118,15 @@
     utterance.onstart = () => setStatus("speaking");
     utterance.onend = utterance.onerror = () => setStatus("ready");
     window.speechSynthesis.speak(utterance);
+    return true;
   }
 
   function navigate(name, addHistory = true) {
     stopAll();
     if (addHistory && state.current !== name) state.history.push(state.current);
     state.current = name;
-    if (name === "welcome") startExpressionCycle();
-    else clearInterval(state.expressionTimer);
+    if (name === "welcome") startWelcomeAnimation();
+    else clearWelcomeAnimation();
     document.body.classList.toggle("is-welcome", name === "welcome");
     screens.forEach((screen) => screen.classList.toggle("active", screen.dataset.screen === name));
     els.backButton.disabled = name === "welcome" || state.history.length === 0;
@@ -75,7 +135,7 @@
 
   function restoreWelcome() {
     els.conversationText.textContent = "สวัสดี! ฉันชื่ออัลวิส — ยินดีต้อนรับสู่โรงเรียนมหิดลวิทยานุสรณ์";
-    els.conversationHint.textContent = "แตะปุ่มด้านล่าง แล้วมาคุยกันนะ";
+    els.conversationHint.textContent = "แตะปุ่มด้านข้าง แล้วมาคุยกันนะ";
     els.startButton.dataset.stage = "hello";
     els.startButton.querySelector(".cta-label").textContent = "คุยกับอัลวิส";
   }
@@ -133,7 +193,7 @@
       els.conversationHint.textContent = "ฉันมีกำหนดการ แผนที่ ข้อมูลโรงเรียน และเรื่องน่าสนใจอีกมากมาย";
       els.startButton.dataset.stage = "menu";
       els.startButton.querySelector(".cta-label").textContent = "เลือกเรื่องที่สนใจ";
-      speak(greeting);
+      acknowledgeWithSmile(() => { if (!speak(greeting)) setStatus("ready"); });
     } else {
       navigate("menu");
     }
