@@ -128,7 +128,7 @@
 
   els.startButton.addEventListener("click", () => {
     if (els.startButton.dataset.stage === "hello") {
-      const greeting = "สวัสดี ฉันชื่ออัล-วิส ยินดีต้อนรับสู่โรงเรียนมหิดลวิทยานุสรณ์ วันนี้อยากให้ช่วยเรื่องอะไร";
+      const greeting = "สวัสดี ฉันชื่อ Alvis ยินดีต้อนรับสู่โรงเรียนมหิดลวิทยานุสรณ์ วันนี้อยากให้ช่วยเรื่องอะไร";
       els.conversationText.textContent = "ดีใจที่ได้พบกัน! วันนี้อยากให้ฉันช่วยเรื่องอะไร?";
       els.conversationHint.textContent = "ฉันมีกำหนดการ แผนที่ ข้อมูลโรงเรียน และเรื่องน่าสนใจอีกมากมาย";
       els.startButton.dataset.stage = "menu";
