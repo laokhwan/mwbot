@@ -6,7 +6,7 @@
   const state = {
     current: "welcome", history: [], soundOn: true, idleTimer: null, recognition: null, listening: false,
     expressionTimer: null, smileReturnTimer: null, blinkTimer: null, blinkEndTimer: null, gazeTimer: null,
-    acknowledgementTimer: null, currentGaze: "center"
+    acknowledgementTimer: null, currentGaze: "center", currentAudio: null
   };
   const expressions = ["ready", "happy", "curious", "listening", "speaking"];
   const els = {
@@ -14,7 +14,8 @@
     questionForm: $("#questionForm"), questionInput: $("#questionInput"), answerText: $("#answerText"), suggestionList: $("#suggestionList"),
     statusChip: $("#statusChip"), statusText: $("#statusText"), soundButton: $("#soundButton"), stopButton: $("#stopButton"),
     backButton: $("#backButton"), micButton: $("#micButton"), micNote: $("#micNote"), robotFace: $("#robotFace"),
-    alvisMascot: $("#alvisMascot"), conversationText: $("#welcomeTitle"), conversationHint: $("#conversationHint"), startButton: $("#startButton")
+    alvisMascot: $("#alvisMascot"), conversationText: $("#welcomeTitle"), conversationHint: $("#conversationHint"),
+    startButton: $("#startButton"), welcomeStopButton: $("#welcomeStopButton")
   };
 
   function setExpression(name) {
@@ -94,6 +95,7 @@
     const labels = { ready: "พร้อมใช้งาน", listening: "กำลังฟัง", speaking: "กำลังพูด" };
     els.statusChip.className = `status-chip ${kind === "ready" ? "" : kind}`;
     els.statusText.textContent = labels[kind] || labels.ready;
+    els.welcomeStopButton.hidden = kind !== "speaking";
     els.robotFace.classList.toggle("speaking-robot", kind === "speaking");
     if (kind === "speaking") { clearWelcomeAnimation(); setExpression("speaking"); }
     else if (kind === "listening") { clearWelcomeAnimation(); setExpression("listening"); }
@@ -102,22 +104,65 @@
 
   function stopAll() {
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    stopCurrentAudio();
     if (state.recognition && state.listening) { try { state.recognition.stop(); } catch (_) {} }
     state.listening = false;
     els.micButton.classList.remove("listening");
     setStatus("ready");
   }
 
-  function speak(text) {
-    if (!state.soundOn || !("speechSynthesis" in window) || !text) return false;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text.replace(/PLACEHOLDER/gi, "ข้อมูลตัวอย่าง"));
-    utterance.lang = "th-TH"; utterance.rate = 1.05; utterance.pitch = 1.35;
+  function stopCurrentAudio() {
+    if (state.currentAudio) {
+      state.currentAudio.onplay = null;
+      state.currentAudio.onended = null;
+      state.currentAudio.onerror = null;
+      state.currentAudio.pause();
+      state.currentAudio.currentTime = 0;
+      state.currentAudio = null;
+    }
+  }
+
+  function speakWithThaiVoice(text) {
+    if (!("speechSynthesis" in window)) return false;
     const thaiVoice = window.speechSynthesis.getVoices().find((voice) => voice.lang.toLowerCase().startsWith("th"));
-    if (thaiVoice) utterance.voice = thaiVoice;
+    if (!thaiVoice) return false;
+    const spokenText = text.replace(/PLACEHOLDER/gi, "ข้อมูลตัวอย่าง").replace(/MWIT/gi, "เอ็มวิทย์");
+    const utterance = new SpeechSynthesisUtterance(spokenText);
+    utterance.lang = "th-TH"; utterance.rate = 1.05; utterance.pitch = 1.35;
+    utterance.voice = thaiVoice;
     utterance.onstart = () => setStatus("speaking");
     utterance.onend = utterance.onerror = () => setStatus("ready");
     window.speechSynthesis.speak(utterance);
+    return true;
+  }
+
+  function speak(text, audioSource = "") {
+    if (!state.soundOn || !text) return false;
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    stopCurrentAudio();
+
+    if (!audioSource) return speakWithThaiVoice(text);
+
+    const audio = new Audio(audioSource);
+    let finished = false;
+    state.currentAudio = audio;
+    audio.preload = "auto";
+    audio.onplay = () => setStatus("speaking");
+    audio.onended = () => {
+      if (finished) return;
+      finished = true;
+      state.currentAudio = null;
+      setStatus("ready");
+    };
+    const useFallback = () => {
+      if (finished) return;
+      finished = true;
+      state.currentAudio = null;
+      if (!speakWithThaiVoice(text)) setStatus("ready");
+    };
+    audio.onerror = useFallback;
+    const playAttempt = audio.play();
+    if (playAttempt && typeof playAttempt.catch === "function") playAttempt.catch(useFallback);
     return true;
   }
 
@@ -147,26 +192,29 @@
   function makeQr(label) { return `<div class="qr-wrap"><div class="qr-placeholder" aria-label="QR Code placeholder"><span>QR<br>PLACEHOLDER</span></div><p><strong>${label}</strong><br>แทนที่ด้วย QR Code จริงก่อนวันงาน</p></div>`; }
   function renderPage(pageId) {
     const page = data.pages[pageId]; if (!page) return;
+    const menuItem = data.menuItems.find((item) => item.id === pageId);
     els.detailTitle.textContent = page.title;
     let body = `<p class="detail-intro">${page.intro}</p>`;
     if (page.type === "timeline") body += `<div class="timeline">${page.items.map(i => `<div class="timeline-row"><time>${i.time}</time><div><b>${i.title}</b><span>${i.place}</span></div></div>`).join("")}</div>${makeQr(page.qrLabel)}`;
     if (page.type === "cards" || page.type === "recommend") body += `<div class="content-cards">${page.items.map(i => `<article class="content-card"><h3>${i.title}</h3><p>${i.text}</p></article>`).join("")}</div>`;
     if (page.type === "map") body += `<div class="map-placeholder"><div><strong>พื้นที่สำหรับแผนผังงานจริง</strong><div class="location-tags">${page.locations.map(x => `<span>${x}</span>`).join("")}</div></div></div>${makeQr(page.qrLabel)}`;
-    els.detailContent.innerHTML = body; navigate("detail"); speak(page.title);
+    els.detailContent.innerHTML = body;
+    navigate("detail");
+    speak(menuItem?.speech || page.title, menuItem?.audio || "");
   }
 
   function findAnswer(rawQuestion) {
     const normalized = rawQuestion.trim().toLowerCase().replace(/[?？!！.,]/g, "");
-    if (!normalized) return "กรุณาพิมพ์คำถามก่อนกดถาม";
+    if (!normalized) return { answer: "กรุณาพิมพ์คำถามก่อนกดถาม", audio: "" };
     let best = null;
     data.qa.forEach((item) => {
       const score = item.keywords.reduce((sum, keyword) => sum + (normalized.includes(keyword.toLowerCase()) ? keyword.length : 0), 0);
       if (score && (!best || score > best.score)) best = { item, score };
     });
-    return best ? best.item.answer : data.fallback;
+    return best ? best.item : { answer: data.fallback, audio: data.fallbackAudio };
   }
 
-  function ask(question) { const answer = findAnswer(question); els.answerText.textContent = answer; speak(answer); resetIdleTimer(); }
+  function ask(question) { const result = findAnswer(question); els.answerText.textContent = result.answer; speak(result.answer, result.audio); resetIdleTimer(); }
 
   function initRecognition() {
     const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -175,30 +223,39 @@
     recognition.onstart = () => { state.listening = true; els.micButton.classList.add("listening"); setStatus("listening"); };
     recognition.onresult = (event) => { const text = event.results[0][0].transcript; els.questionInput.value = text; ask(text); };
     recognition.onerror = (event) => { els.answerText.textContent = event.error === "not-allowed" ? "Chrome ไม่ได้รับอนุญาตให้ใช้ไมโครโฟน กรุณาตรวจสอบ Site settings" : "ไม่ได้ยินคำถามชัดเจน กรุณาลองใหม่หรือพิมพ์คำถาม"; };
-    recognition.onend = () => { state.listening = false; els.micButton.classList.remove("listening"); if (!window.speechSynthesis.speaking) setStatus("ready"); };
+    recognition.onend = () => { state.listening = false; els.micButton.classList.remove("listening"); if (!state.currentAudio && !("speechSynthesis" in window && window.speechSynthesis.speaking)) setStatus("ready"); };
     state.recognition = recognition; els.micButton.hidden = false; els.micNote.textContent = "แตะปุ่มพูด แล้วอนุญาตให้ Chrome ใช้ไมโครโฟน";
   }
 
   data.menuItems.forEach((item) => {
     const button = document.createElement("button"); button.type = "button"; button.className = `menu-card ${item.color}`;
     button.innerHTML = `<span class="menu-icon" aria-hidden="true">${item.icon}</span><h3>${item.title}</h3><p>${item.subtitle}</p>`;
-    button.addEventListener("click", () => item.id === "ask" ? navigate("ask") : renderPage(item.id)); els.menuGrid.appendChild(button);
+    button.addEventListener("click", () => {
+      if (item.id === "ask") {
+        navigate("ask");
+        speak(item.speech, item.audio);
+      } else {
+        renderPage(item.id);
+      }
+    });
+    els.menuGrid.appendChild(button);
   });
   data.qa.slice(0, 8).forEach((item) => { const button = document.createElement("button"); button.type = "button"; button.textContent = item.question; button.addEventListener("click", () => { els.questionInput.value = item.question; ask(item.question); }); els.suggestionList.appendChild(button); });
 
   els.startButton.addEventListener("click", () => {
     if (els.startButton.dataset.stage === "hello") {
-      const greeting = "สวัสดี ฉันชื่อ Alvis ยินดีต้อนรับสู่โรงเรียนมหิดลวิทยานุสรณ์ วันนี้อยากให้ช่วยเรื่องอะไร";
+      const greeting = "สวัสดี ฉันชื่ออัล-วิส ยินดีต้อนรับสู่โรงเรียนมหิดลวิทยานุสรณ์ วันนี้อยากให้ช่วยเรื่องอะไร";
       els.conversationText.textContent = "ดีใจที่ได้พบกัน! วันนี้อยากให้ฉันช่วยเรื่องอะไร?";
       els.conversationHint.textContent = "ฉันมีกำหนดการ แผนที่ ข้อมูลโรงเรียน และเรื่องน่าสนใจอีกมากมาย";
       els.startButton.dataset.stage = "menu";
       els.startButton.querySelector(".cta-label").textContent = "เลือกเรื่องที่สนใจ";
-      acknowledgeWithSmile(() => { if (!speak(greeting)) setStatus("ready"); });
+      acknowledgeWithSmile(() => { if (!speak(greeting, data.audio && data.audio.welcome)) setStatus("ready"); });
     } else {
       navigate("menu");
     }
   });
   $("#homeButton").addEventListener("click", goHome); els.backButton.addEventListener("click", goBack); $("#resetButton").addEventListener("click", resetApp); els.stopButton.addEventListener("click", stopAll);
+  els.welcomeStopButton.addEventListener("click", stopAll);
   els.soundButton.addEventListener("click", () => { state.soundOn = !state.soundOn; els.soundButton.setAttribute("aria-pressed", String(state.soundOn)); els.soundButton.innerHTML = `${state.soundOn ? "🔊 <span>เปิดเสียง</span>" : "🔇 <span>ปิดเสียง</span>"}`; if (!state.soundOn) stopAll(); else speak("เปิดเสียงแล้ว"); resetIdleTimer(); });
   els.questionForm.addEventListener("submit", (event) => { event.preventDefault(); ask(els.questionInput.value); });
   els.micButton.addEventListener("click", () => { stopAll(); try { state.recognition.start(); } catch (_) { els.answerText.textContent = "ไมโครโฟนกำลังทำงานอยู่ กรุณารอสักครู่"; } resetIdleTimer(); });

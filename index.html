@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#082f49" />
     <title>Alvis — MWIT Open House</title>
+    <link rel="preload" href="audio/welcome-v1.mp3" as="audio" type="audio/mpeg" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -39,9 +40,12 @@
               <p class="speaker-name">อัลวิส <span>ผู้ช่วยนำชมของคุณ</span></p>
               <h1 id="welcomeTitle" class="conversation-text" aria-live="polite">สวัสดี! ฉันชื่ออัลวิส — ยินดีต้อนรับสู่โรงเรียนมหิดลวิทยานุสรณ์</h1>
               <p class="conversation-hint" id="conversationHint">แตะปุ่มด้านข้าง แล้วมาคุยกันนะ</p>
-              <button class="primary-cta conversation-cta" id="startButton" type="button" data-stage="hello">
-                <span class="cta-icon" aria-hidden="true">●</span><span class="cta-label">คุยกับอัลวิส</span><span class="cta-arrow">→</span>
-              </button>
+              <div class="conversation-actions">
+                <button class="primary-cta conversation-cta" id="startButton" type="button" data-stage="hello">
+                  <span class="cta-icon" aria-hidden="true">●</span><span class="cta-label">คุยกับอัลวิส</span><span class="cta-arrow">→</span>
+                </button>
+                <button class="welcome-stop-button" id="welcomeStopButton" type="button" hidden>■ หยุดเสียง</button>
+              </div>
               <p class="placeholder-warning">ข้อมูลในต้นแบบนี้เป็นข้อมูลตัวอย่าง กรุณาตรวจสอบก่อนใช้งานจริง</p>
             </div>
             <div class="sound-waves" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>

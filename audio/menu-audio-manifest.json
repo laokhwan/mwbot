@@ -1,0 +1,50 @@
+[
+  {
+    "file": "menu-schedule-v1.mp3",
+    "text": "นี่คือกำหนดการวันนี้ สามารถดูเวลา กิจกรรม และสถานที่ได้บนหน้าจอ",
+    "placeholder": true,
+    "voice": "th-TH-Standard-A",
+    "speakingRate": 1.08,
+    "pitch": 4.0
+  },
+  {
+    "file": "menu-map-v1.mp3",
+    "text": "นี่คือแผนที่งาน เลือกดูจุดสำคัญภายในงานและเส้นทางไปยังสถานที่ต่าง ๆ ได้เลย",
+    "placeholder": true,
+    "voice": "th-TH-Standard-A",
+    "speakingRate": 1.08,
+    "pitch": 4.0
+  },
+  {
+    "file": "menu-about-v1.mp3",
+    "text": "มารู้จักเอ็มวิทย์ หรือโรงเรียนมหิดลวิทยานุสรณ์ พร้อมข้อมูลหลักสูตรและชีวิตในโรงเรียนกัน",
+    "placeholder": true,
+    "voice": "th-TH-Standard-A",
+    "speakingRate": 1.08,
+    "pitch": 4.0
+  },
+  {
+    "file": "menu-projects-v1.mp3",
+    "text": "หน้านี้รวบรวมตัวอย่างโครงงานนักเรียน เลือกดูผลงานและนิทรรศการที่สนใจได้เลย",
+    "placeholder": true,
+    "voice": "th-TH-Standard-A",
+    "speakingRate": 1.08,
+    "pitch": 4.0
+  },
+  {
+    "file": "menu-ask-v1.mp3",
+    "text": "ถามอัลวิสได้เลย จะพิมพ์คำถาม หรือแตะปุ่มไมโครโฟนแล้วพูดก็ได้",
+    "placeholder": true,
+    "voice": "th-TH-Standard-A",
+    "speakingRate": 1.08,
+    "pitch": 4.0
+  },
+  {
+    "file": "menu-recommend-v1.mp3",
+    "text": "บอกสิ่งที่สนใจ แล้วอัลวิสจะช่วยแนะนำจุดที่น่าไปชมต่อให้",
+    "placeholder": true,
+    "voice": "th-TH-Standard-A",
+    "speakingRate": 1.08,
+    "pitch": 4.0
+  }
+]
